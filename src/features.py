@@ -23,11 +23,24 @@ class FeatureColumns:
     categorical: list[str]
 
 
+def define_heart_disease_feature_columns() -> FeatureColumns:
+    """Return feature groups for the UCI processed Cleveland dataset."""
+    return FeatureColumns(
+        numeric=["age", "trestbps", "chol", "thalach", "oldpeak"],
+        categorical=["sex", "cp", "fbs", "restecg", "exang", "slope", "ca", "thal"],
+    )
+
+
 def infer_feature_columns(data: pd.DataFrame) -> FeatureColumns:
     """Infer numeric and categorical columns from pandas dtypes."""
     numeric = data.select_dtypes(include=["number", "bool"]).columns.tolist()
     categorical = [column for column in data.columns if column not in numeric]
     return FeatureColumns(numeric=numeric, categorical=categorical)
+
+
+def feature_column_names(columns: FeatureColumns) -> list[str]:
+    """Return numeric and categorical feature names in modeling order."""
+    return columns.numeric + columns.categorical
 
 
 def build_preprocessor(columns: FeatureColumns) -> ColumnTransformer:

@@ -6,7 +6,7 @@ No raw dataset is tracked in Git. This repository must not contain sensitive, pr
 
 ## Current Phase
 
-Phase 3 completes initial local exploratory data analysis for the UCI Heart Disease dataset. Modeling is intentionally not included yet. Generated EDA figures are stored in `reports/figures/`.
+Phase 4 adds an interpretable logistic regression baseline for the UCI Heart Disease dataset. The model is exploratory, educational, and not clinically validated. Generated EDA and baseline-modeling figures are stored in `reports/figures/`.
 
 ## Biomedical Question
 
@@ -84,4 +84,4 @@ python -m ruff check .
 
 ## Current Status
 
-Initial EDA has been completed locally using `data/raw/processed.cleveland.data`. Raw data are excluded from Git.
+Initial EDA and baseline modeling have been completed locally using `data/raw/processed.cleveland.data`. Raw data are excluded from Git.
