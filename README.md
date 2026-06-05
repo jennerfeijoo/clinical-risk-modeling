@@ -4,6 +4,10 @@ This repository is a starter project for a Biomedical Data Science for Personali
 
 No dataset is included yet. This repository must not contain sensitive, private, restricted, or re-identifiable patient data.
 
+## Current Phase
+
+Phase 2 adds data documentation and exploratory data analysis for the UCI Heart Disease dataset. Modeling is intentionally not included yet.
+
 ## Biomedical Question
 
 Primary question to define after dataset selection:
