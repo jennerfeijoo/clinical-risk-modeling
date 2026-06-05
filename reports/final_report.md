@@ -29,6 +29,9 @@ The original outcome variable, `num`, is loaded as `target` and uses values from
 
 The complete variable dictionary, access instructions, license, and data limitations are documented in [README_data.md](../data/README_data.md).
 
+The intended use, evaluation scope, and known failure modes of the fitted
+baseline are summarized separately in the [model card](model_card.md).
+
 ## 3. Methods
 
 ### 3.1 Data Preparation

@@ -52,19 +52,36 @@ In the original dataset framing, values greater than `0` indicate presence of an
 | Variable | Type | Description | Role |
 | --- | --- | --- | --- |
 | `age` | numeric | Age in years | Predictor |
-| `sex` | categorical-coded | Sex coded as `1` = male, `0` = female in the dataset documentation | Predictor |
-| `cp` | categorical-coded | Chest pain type | Predictor |
+| `sex` | categorical-coded | Sex code from the source documentation | Predictor |
+| `cp` | categorical-coded | Chest pain type code | Predictor |
 | `trestbps` | numeric | Resting blood pressure on admission to the hospital, in mm Hg | Predictor |
 | `chol` | numeric | Serum cholesterol in mg/dl | Predictor |
-| `fbs` | binary-coded | Fasting blood sugar greater than 120 mg/dl, coded as `1` = true, `0` = false | Predictor |
-| `restecg` | categorical-coded | Resting electrocardiographic results | Predictor |
+| `fbs` | binary-coded | Indicator for fasting blood sugar greater than 120 mg/dl | Predictor |
+| `restecg` | categorical-coded | Resting electrocardiographic result code | Predictor |
 | `thalach` | numeric | Maximum heart rate achieved | Predictor |
-| `exang` | binary-coded | Exercise-induced angina, coded as `1` = yes, `0` = no | Predictor |
+| `exang` | binary-coded | Exercise-induced angina indicator | Predictor |
 | `oldpeak` | numeric | ST depression induced by exercise relative to rest | Predictor |
-| `slope` | categorical-coded | Slope of the peak exercise ST segment | Predictor |
-| `ca` | numeric/categorical-coded | Number of major vessels colored by fluoroscopy | Predictor |
-| `thal` | categorical-coded | Thalassemia-related categorical code | Predictor |
+| `slope` | categorical-coded | Peak exercise ST-segment slope code | Predictor |
+| `ca` | count/categorical-coded | Number of major vessels colored by fluoroscopy | Predictor |
+| `thal` | categorical-coded | Historical thal test result code | Predictor |
 | `target` / `num` | categorical-coded | Original angiographic disease label, loaded as `target` in this repository | Outcome label |
+
+## Coded Variable Definitions
+
+The code meanings below are reproduced from the UCI dataset documentation.
+They reflect historical dataset terminology and should not be overinterpreted
+as contemporary clinical definitions.
+
+| Variable | Documented codes |
+| --- | --- |
+| `sex` | `0` = female; `1` = male |
+| `cp` | `1` = typical angina; `2` = atypical angina; `3` = non-anginal pain; `4` = asymptomatic |
+| `fbs` | `0` = fasting blood sugar not above 120 mg/dl; `1` = fasting blood sugar above 120 mg/dl |
+| `restecg` | `0` = normal; `1` = ST-T wave abnormality; `2` = probable or definite left ventricular hypertrophy by Estes' criteria |
+| `exang` | `0` = no exercise-induced angina; `1` = exercise-induced angina |
+| `slope` | `1` = upsloping; `2` = flat; `3` = downsloping |
+| `ca` | Integer count from `0` to `3` major vessels colored by fluoroscopy; missing values occur in the processed Cleveland file |
+| `thal` | `3` = normal; `6` = fixed defect; `7` = reversible defect; missing values occur in the processed Cleveland file |
 
 ## Missing Data
 
@@ -75,6 +92,7 @@ The processed Cleveland file uses `?` to represent missing values. The loading a
 - The dataset is historical and may not reflect contemporary clinical practice or current population distributions.
 - The commonly used 14-variable processed version is a reduced representation of the original database.
 - Several variables are categorical codes that require careful documentation before interpretation.
+- The sex variable uses a binary coding scheme and terminology from the source documentation; it does not represent the full range of sex or gender information relevant to contemporary analysis.
 - Missingness is present in some variables and should be summarized before analysis.
 - The dataset is not sufficient on its own to support clinical deployment claims.
 - Any observed associations are predictive or descriptive only, not causal.

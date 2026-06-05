@@ -1,5 +1,10 @@
 # Interpretable Clinical Risk Modeling
 
+[![CI](https://github.com/jennerfeijoo/clinical-risk-modeling/actions/workflows/ci.yml/badge.svg)](https://github.com/jennerfeijoo/clinical-risk-modeling/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-%3E%3D3.10-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Citation](https://img.shields.io/badge/Citation-CITATION.cff-blue.svg)](CITATION.cff)
+
 An educational Biomedical Data Science for Personalized Medicine portfolio project using the UCI Heart Disease processed Cleveland dataset. The project demonstrates a reproducible workflow for clinical tabular data: source documentation, exploratory analysis, leakage-aware preprocessing, interpretable logistic regression, internal cross-validation, calibration assessment, and threshold analysis.
 
 This repository is not a diagnostic tool, clinical decision support system, or clinically validated risk model.
@@ -38,9 +43,10 @@ Raw data are intentionally excluded from Git. See [data/README_data.md](data/REA
 - [Baseline logistic regression](notebooks/02_baseline_modeling.ipynb)
 - [Model validation and calibration](notebooks/03_model_validation_and_calibration.ipynb)
 - [Professional project report](reports/final_report.md)
+- [Model card](reports/model_card.md)
 - [Generated figures](reports/figures/)
 - [Reusable source modules](src/)
-- [Automated tests](tests/test_basic.py)
+- [Automated tests](tests/)
 
 ## Key Findings
 
@@ -88,11 +94,14 @@ clinical-risk-modeling/
 |   `-- 03_model_validation_and_calibration.ipynb
 |-- reports/
 |   |-- figures/             # Generated analytical figures
-|   `-- final_report.md      # Complete written report
+|   |-- final_report.md      # Complete written report
+|   `-- model_card.md        # Intended use and model limitations
 |-- src/                     # Reusable processing, modeling, and evaluation code
-|-- tests/                   # Pytest coverage for core helpers
+|-- tests/                   # CI-safe pytest coverage for core helpers
+|-- .github/workflows/       # Automated lint and test checks
 |-- CITATION.cff
 |-- LICENSE
+|-- pyproject.toml
 `-- requirements.txt
 ```
 
@@ -123,6 +132,12 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
+Alternatively, install the package with notebook and development extras:
+
+```bash
+python -m pip install -e ".[notebook,dev]"
+```
+
 Download the processed Cleveland file from the official UCI page and place it at:
 
 ```text
@@ -136,6 +151,11 @@ python -m pytest
 python -m ruff check .
 ```
 
+GitHub Actions runs Ruff and the synthetic source-code tests on pushes and pull
+requests. CI intentionally does not execute notebooks or require
+`data/raw/processed.cleveland.data`; notebook reproduction remains a local,
+data-dependent workflow.
+
 ## Next Steps
 
 - Evaluate the unchanged pipeline on a suitable external dataset.
@@ -147,4 +167,6 @@ python -m ruff check .
 
 Repository code and documentation are available under the [MIT License](LICENSE). The UCI dataset is a separate work distributed under CC BY 4.0; the repository license does not relicense or redistribute the raw dataset.
 
-To cite this portfolio project, see [CITATION.cff](CITATION.cff).
+To cite this portfolio project, see [CITATION.cff](CITATION.cff). Intended use,
+evaluation scope, and known failure modes are summarized in the
+[model card](reports/model_card.md).

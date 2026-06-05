@@ -93,16 +93,55 @@ def load_heart_disease_data(path: str | Path) -> pd.DataFrame:
     return data
 
 
+def _validated_target_values(
+    data: pd.DataFrame,
+    target_column: str,
+) -> pd.Series:
+    """Return a validated numeric target series for binary recoding."""
+    if target_column not in data.columns:
+        raise ValueError(f"Target column not found: {target_column}")
+    if data[target_column].isna().any():
+        raise ValueError(f"Target column contains missing values: {target_column}")
+
+    try:
+        target = pd.to_numeric(data[target_column], errors="raise")
+    except (TypeError, ValueError) as error:
+        raise ValueError("Target values must be numeric.") from error
+
+    if (target < 0).any():
+        raise ValueError("Target values must be zero or positive.")
+    return target
+
+
+def add_binary_target_column(
+    data: pd.DataFrame,
+    target_column: str = "target",
+    output_column: str = "target_binary",
+) -> pd.DataFrame:
+    """Return a copy with a binary target while preserving the original target.
+
+    Original target values equal to ``0`` map to ``0``. Values greater than
+    ``0`` map to ``1``.
+    """
+    if output_column == target_column:
+        raise ValueError("Output column must differ from the original target column.")
+
+    target = _validated_target_values(data, target_column)
+    cleaned = data.copy()
+    cleaned[output_column] = (target > 0).astype(int)
+    return cleaned
+
+
 def binarize_heart_disease_target(
     data: pd.DataFrame, target_column: str = "target"
 ) -> pd.DataFrame:
-    """Return a copy with target ``0`` retained and values above ``0`` mapped to 1."""
-    if target_column not in data.columns:
-        raise ValueError(f"Target column not found: {target_column}")
+    """Return a copy with the selected target replaced by its binary coding.
 
+    This compatibility helper preserves the original API. New analysis code
+    should prefer :func:`add_binary_target_column` so the source target remains
+    available for documentation and audit.
+    """
+    target = _validated_target_values(data, target_column)
     cleaned = data.copy()
-    target = pd.to_numeric(cleaned[target_column], errors="raise")
-    if target.isna().any():
-        raise ValueError("Target values must not be missing.")
     cleaned[target_column] = (target > 0).astype(int)
     return cleaned

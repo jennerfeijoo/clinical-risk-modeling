@@ -1,7 +1,7 @@
-pandas
-numpy
-scikit-learn
-matplotlib
-jupyterlab
-pytest
-ruff
+matplotlib>=3.8
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+jupyterlab>=4.2
+pytest>=8.0
+ruff>=0.6
