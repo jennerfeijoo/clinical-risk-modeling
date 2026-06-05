@@ -30,22 +30,22 @@ The final question should specify:
 
 ```text
 clinical-risk-modeling/
-├── data/
-│   ├── raw/                 # Local raw data, not committed
-│   ├── processed/           # Local processed data, not committed
-│   └── README_data.md       # Data card template
-├── notebooks/               # Sequential exploratory notebooks
-├── reports/
-│   ├── figures/             # Generated figures
-│   └── final_report.md      # Structured report template
-├── src/
-│   ├── data_processing.py   # Data loading and cleaning helpers
-│   ├── features.py          # Feature engineering helpers
-│   ├── modeling.py          # Baseline modeling helpers
-│   └── evaluation.py        # Evaluation metrics and summaries
-├── tests/
-│   └── test_basic.py        # Minimal starter tests
-└── requirements.txt
+|-- data/
+|   |-- raw/                 # Local raw data, not committed
+|   |-- processed/           # Local processed data, not committed
+|   `-- README_data.md       # Data card template
+|-- notebooks/               # Sequential exploratory notebooks
+|-- reports/
+|   |-- figures/             # Generated figures
+|   `-- final_report.md      # Structured report template
+|-- src/
+|   |-- data_processing.py   # Data loading and cleaning helpers
+|   |-- features.py          # Feature engineering helpers
+|   |-- modeling.py          # Baseline modeling helpers
+|   `-- evaluation.py        # Evaluation metrics and summaries
+|-- tests/
+|   `-- test_basic.py        # Minimal starter tests
+`-- requirements.txt
 ```
 
 ## Reproducibility
@@ -60,7 +60,13 @@ python -m pip install -r requirements.txt
 Run tests:
 
 ```bash
-pytest
+python -m pytest
+```
+
+Run linting:
+
+```bash
+python -m ruff check .
 ```
 
 ## Modeling Principles
