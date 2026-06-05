@@ -2,11 +2,11 @@
 
 This repository is a starter project for a Biomedical Data Science for Personalized Medicine portfolio. It is designed for a future clinical risk modeling dataset, with emphasis on reproducible preprocessing, interpretable baseline models, cautious evaluation, and transparent reporting.
 
-No dataset is included yet. This repository must not contain sensitive, private, restricted, or re-identifiable patient data.
+No raw dataset is tracked in Git. This repository must not contain sensitive, private, restricted, or re-identifiable patient data.
 
 ## Current Phase
 
-Phase 2 adds data documentation and exploratory data analysis for the UCI Heart Disease dataset. Modeling is intentionally not included yet.
+Phase 3 completes initial local exploratory data analysis for the UCI Heart Disease dataset. Modeling is intentionally not included yet. Generated EDA figures are stored in `reports/figures/`.
 
 ## Biomedical Question
 
@@ -84,4 +84,4 @@ python -m ruff check .
 
 ## Current Status
 
-Project skeleton only. No clinical dataset, results, or claims are included.
+Initial EDA has been completed locally using `data/raw/processed.cleveland.data`. Raw data are excluded from Git.
