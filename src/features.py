@@ -14,10 +14,29 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+HEART_DISEASE_NUMERIC_FEATURES: tuple[str, ...] = (
+    "age",
+    "trestbps",
+    "chol",
+    "thalach",
+    "oldpeak",
+)
+
+HEART_DISEASE_CATEGORICAL_FEATURES: tuple[str, ...] = (
+    "sex",
+    "cp",
+    "fbs",
+    "restecg",
+    "exang",
+    "slope",
+    "ca",
+    "thal",
+)
+
 
 @dataclass(frozen=True)
 class FeatureColumns:
-    """Column groups used by the preprocessing pipeline."""
+    """Explicit numeric and categorical column groups for preprocessing."""
 
     numeric: list[str]
     categorical: list[str]
@@ -30,13 +49,13 @@ def define_heart_disease_feature_columns() -> FeatureColumns:
     are treated as categorical so their codes are not assumed to be linear.
     """
     return FeatureColumns(
-        numeric=["age", "trestbps", "chol", "thalach", "oldpeak"],
-        categorical=["sex", "cp", "fbs", "restecg", "exang", "slope", "ca", "thal"],
+        numeric=list(HEART_DISEASE_NUMERIC_FEATURES),
+        categorical=list(HEART_DISEASE_CATEGORICAL_FEATURES),
     )
 
 
 def infer_feature_columns(data: pd.DataFrame) -> FeatureColumns:
-    """Infer numeric and categorical columns from pandas dtypes."""
+    """Infer feature groups from pandas dtypes for generic tabular data."""
     numeric = data.select_dtypes(include=["number", "bool"]).columns.tolist()
     categorical = [column for column in data.columns if column not in numeric]
     return FeatureColumns(numeric=numeric, categorical=categorical)
@@ -48,7 +67,7 @@ def feature_column_names(columns: FeatureColumns) -> list[str]:
 
 
 def build_preprocessor(columns: FeatureColumns) -> ColumnTransformer:
-    """Build a baseline preprocessing pipeline for tabular clinical data."""
+    """Build leakage-aware preprocessing for numeric and categorical features."""
     numeric_pipeline = Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="median")),

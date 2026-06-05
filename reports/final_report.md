@@ -1,142 +1,144 @@
-# Clinical Risk Modeling Report
+# Interpretable Clinical Risk Modeling with the UCI Heart Disease Dataset
 
-## 1. Executive Summary
+## Abstract
 
-This report summarizes exploratory data analysis, an interpretable logistic regression baseline, and internal validation for the UCI Heart Disease processed Cleveland dataset. This project should not be interpreted as a diagnostic medical tool or a clinically validated risk model.
+This project demonstrates a reproducible and interpretable clinical risk-modeling workflow using the UCI Heart Disease processed Cleveland dataset. The analysis includes data documentation, exploratory analysis, a logistic regression baseline, training-set cross-validation, held-out evaluation, calibration assessment, and threshold analysis. All preprocessing is fitted within scikit-learn pipelines to reduce leakage risk. The held-out results are encouraging for this particular split, but the dataset is small, historical, and unsuitable for establishing clinical validity. The project is educational and must not be used for diagnosis or individual medical decisions.
 
-## 2. Biomedical Question
+## 1. Background
 
-- Population:
-- Prediction target:
-- Prediction time point:
-- Candidate predictors:
-- Intended use:
+Clinical prediction modeling requires methodological transparency as well as predictive performance. Important considerations include outcome definition, missing-data handling, separation of model development and evaluation data, probability calibration, threshold consequences, and external validity.
 
-## 3. Dataset
+This project asks:
 
-- Dataset name: UCI Heart Disease, processed Cleveland file
+> Can the documented variables in the processed Cleveland dataset support a reproducible, interpretable binary prediction workflow for educational analysis?
+
+The objective is to demonstrate responsible analytical practice, not to create a medical device or clinically deployable risk score.
+
+## 2. Dataset
+
+The analysis uses the processed Cleveland subset of the UCI Heart Disease dataset.
+
 - Source: UCI Machine Learning Repository
-- Access date: TODO: document local download date
-- Local raw file: `data/raw/processed.cleveland.data`
-- Final cohort size in local file: 303 rows
-- Original variables: 14 columns
-- Exploratory binary target distribution: 164 records with `target_binary = 0`; 139 records with `target_binary = 1`
+- Local file: `data/raw/processed.cleveland.data`
+- Rows: 303
+- Original variables: 14
+- Raw data status: stored locally and excluded from Git
+- Local access date: June 5, 2026
 
-Refer to `data/README_data.md` for the complete data card.
+The original outcome variable, `num`, is loaded as `target` and uses values from `0` to `4`. For binary analysis, `target_binary` retains `0` as `0` and maps values greater than `0` to `1`. This transformation follows a common analytical framing of the dataset but does not constitute a diagnosis.
 
-## 4. Methods
+The complete variable dictionary, access instructions, license, and data limitations are documented in [README_data.md](../data/README_data.md).
 
-### 4.1 Preprocessing
+## 3. Methods
 
-- Missing data approach: median imputation for numeric variables and most-frequent imputation for categorical variables, fitted on training data only.
-- Categorical encoding: one-hot encoding with unknown categories ignored at test time.
-- Numeric scaling: standard scaling for numeric variables, fitted on training data only.
-- Excluded variables: original multiclass `target` is preserved for documentation but excluded from model features.
-- Leakage prevention checks: train/test split is created before fitting preprocessing steps.
+### 3.1 Data Preparation
 
-### 4.2 Feature Engineering
+The raw comma-separated file is loaded with 14 documented column names. The `?` marker is treated as missing, and analysis columns are converted to numeric values where appropriate. The original target is preserved alongside the derived binary target.
 
-- Baseline predictors: 13 variables from the processed Cleveland dataset.
-- Numeric variables: `age`, `trestbps`, `chol`, `thalach`, and `oldpeak`.
-- Categorical variables: `sex`, `cp`, `fbs`, `restecg`, `exang`, `slope`, `ca`, and `thal`.
-- Derived variable: `target_binary`, with original target `0` mapped to `0` and values greater than `0` mapped to `1`.
-- Clinical rationale: variables are retained as documented dataset features; no causal interpretation is assigned.
+### 3.2 Feature Definition
 
-### 4.3 Modeling
+Five variables are treated as continuous numeric features:
 
-- Baseline model: logistic regression in a scikit-learn pipeline.
-- Comparison baseline: majority-class `DummyClassifier`.
-- Train/test strategy: stratified 80/20 split with `random_state=42`.
-- Class imbalance handling: logistic regression uses `class_weight="balanced"`.
-- Hyperparameters: simple defaults with `max_iter=1000`, `solver="liblinear"`.
+- `age`
+- `trestbps`
+- `chol`
+- `thalach`
+- `oldpeak`
 
-### 4.4 Evaluation
+Eight integer-coded variables are treated as categorical features:
 
-Reported metrics:
+- `sex`
+- `cp`
+- `fbs`
+- `restecg`
+- `exang`
+- `slope`
+- `ca`
+- `thal`
 
-- Discrimination: ROC AUC and average precision
-- Calibration: calibration curve and Brier score
-- Threshold-based performance: sensitivity, specificity, precision, recall, and F1 score
+Treating coded categories as categorical avoids assuming that their numeric codes have a linear relationship with the outcome.
 
-## 5. Preliminary Exploratory Data Analysis
+### 3.3 Preprocessing
 
-EDA was run locally from `notebooks/01_exploratory_data_analysis.ipynb`. The raw dataset is not tracked in Git.
+Preprocessing is contained within a scikit-learn `Pipeline` and `ColumnTransformer`:
 
-### 5.1 Data Quality Summary
+- Numeric missing values: median imputation
+- Numeric scaling: standardization
+- Categorical missing values: most-frequent imputation
+- Categorical representation: one-hot encoding with unknown categories ignored
 
-- Shape: 303 rows and 14 original columns.
-- Missing values: `ca` has 4 missing values; `thal` has 2 missing values.
+The data are divided using a stratified 80/20 train/test split with `random_state=42`. Preprocessing is fitted only on training data, including within each cross-validation fold.
+
+### 3.4 Models
+
+Two simple models are evaluated:
+
+1. A majority-class `DummyClassifier`
+2. Logistic regression with balanced class weights
+
+Logistic regression is retained as the primary model because it provides a transparent baseline and supports inspection of fitted coefficients. Coefficients are interpreted as model parameters under the chosen preprocessing scheme, not as causal effects.
+
+### 3.5 Evaluation Design
+
+Five-fold stratified cross-validation is performed only on the 242-record training partition. A fresh pipeline is then fitted on the full training set and evaluated once on the 61-record held-out test set.
+
+Reported metrics include:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- ROC-AUC
+- Average precision
+- Confusion matrix
+- Brier score
+- Calibration curve
+- Threshold-dependent precision, recall, specificity, and F1-score
+
+## 4. Exploratory Analysis
+
+### 4.1 Data Quality
+
+- Missing values: `ca` has 4 missing values and `thal` has 2.
 - Duplicate rows: 0.
-- Original target distribution: `0` = 164, `1` = 55, `2` = 36, `3` = 35, `4` = 13.
-- Exploratory binary target distribution: `0` = 164, `1` = 139.
+- Original target counts: `0` = 164, `1` = 55, `2` = 36, `3` = 35, `4` = 13.
+- Binary target counts: `0` = 164 and `1` = 139.
 
-### 5.2 Main Descriptive Observations
+### 4.2 Descriptive Summary
 
-- Age ranges from 29 to 77 years, with a mean of 54.44 years.
-- Serum cholesterol ranges from 126 to 564 mg/dl, with a mean of 246.69 mg/dl.
-- Maximum heart rate achieved ranges from 71 to 202, with a mean of 149.61.
-- In descriptive group summaries, the `target_binary = 1` group has a higher mean age and lower mean maximum heart rate than the `target_binary = 0` group in this dataset.
+- Mean age: 54.44 years; range: 29 to 77.
+- Mean serum cholesterol: 246.69 mg/dl; range: 126 to 564.
+- Mean maximum heart rate achieved: 149.61; range: 71 to 202.
 
-These are dataset-level descriptive observations only. They should not be interpreted as causal effects, diagnostic rules, or clinical recommendations.
+The group coded `target_binary = 1` has a higher mean age and lower mean maximum heart rate than the group coded `0` in this dataset. These are descriptive observations only and do not imply causation or clinical decision rules.
 
-## 6. Biomedical Interpretation
+Selected exploratory figures:
 
-Interpretation is limited to data quality, descriptive patterns, and the behavior of a simple baseline model on a held-out split. No individual-level clinical conclusions should be drawn.
+- [Age distribution](figures/age_distribution.png)
+- [Age by binary target](figures/age_by_target_binary.png)
+- [Missing-value summary](figures/missing_values.png)
 
-## 7. Baseline Modeling
+## 5. Baseline Modeling
 
-### 7.1 Modeling Objective
+The held-out test set contains 33 records coded `0` and 28 coded `1`.
 
-The Phase 4 objective is to establish a transparent baseline workflow for binary educational risk modeling. The original `target` column is preserved, and `target_binary` maps original `0` to `0` and original values greater than `0` to `1`.
-
-### 7.2 Train/Test Split
-
-The dataset was split into 242 training rows and 61 held-out test rows using stratified splitting. The held-out test set contains 33 records with `target_binary = 0` and 28 records with `target_binary = 1`.
-
-### 7.3 Baseline Models
-
-- Dummy baseline: majority-class `DummyClassifier`.
-- Logistic regression baseline: missing-value imputation, numeric scaling, categorical one-hot encoding, and logistic regression in a single scikit-learn pipeline.
-
-### 7.4 Held-Out Test Metrics
-
-| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC | PR-AUC |
+| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC | Average precision |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Dummy majority baseline | 0.541 | 0.000 | 0.000 | 0.000 | 0.500 | 0.459 |
 | Logistic regression baseline | 0.869 | 0.812 | 0.929 | 0.867 | 0.966 | 0.963 |
 
-### 7.5 Cautious Interpretation
+The logistic regression pipeline performs better than the majority-class baseline on this held-out split. The result demonstrates that the workflow extracts predictive signal in this dataset; it does not establish medical validity or expected performance in another population.
 
-The logistic regression baseline performs better than the dummy baseline on this single held-out split. This result should be treated as an exploratory benchmark for the repository workflow, not as evidence of medical validity or readiness for clinical use.
+Selected baseline figures:
 
-### 7.6 Baseline Modeling Limitations
+- [Held-out confusion matrix](figures/baseline_confusion_matrix.png)
+- [ROC curve](figures/baseline_roc_curve.png)
+- [Precision-recall curve](figures/baseline_precision_recall_curve.png)
+- [Largest fitted coefficients](figures/baseline_logistic_coefficients.png)
 
-- Results are from one historical dataset.
-- No external validation has been performed.
-- Calibration estimates remain uncertain because the held-out sample is small.
-- Coefficients describe model behavior under this preprocessing setup and should not be interpreted causally.
-- The model should not be used for diagnosis, treatment, or individual medical decisions.
+## 6. Model Validation and Calibration
 
-### 7.7 Next Steps
-
-- Review the internal validation and calibration findings below.
-- Consider external validation before any claims about transportability.
-- Keep future models simple until the baseline is fully documented.
-
-## 8. Model Validation and Calibration
-
-### 8.1 Why Validation Is Needed
-
-A single train/test split can give an unstable estimate, particularly for a small dataset. Phase 5 therefore uses stratified cross-validation within the training partition to estimate internal variability while preserving the held-out test set for one final evaluation.
-
-### 8.2 Validation Design
-
-- Held-out design: stratified 80/20 split with 242 training rows and 61 test rows.
-- Cross-validation design: five-fold stratified cross-validation on training data only.
-- Leakage control: imputation, scaling, one-hot encoding, and logistic regression are refitted within each training fold through the scikit-learn pipeline.
-- Final evaluation: a fresh pipeline is fitted on all training rows and evaluated once on the held-out test set.
-
-### 8.3 Cross-Validation Results
+### 6.1 Cross-Validation
 
 | Metric | Training CV Mean | Training CV SD | Held-Out Test |
 | --- | ---: | ---: | ---: |
@@ -147,54 +149,84 @@ A single train/test split can give an unstable estimate, particularly for a smal
 | ROC-AUC | 0.902 | 0.017 | 0.966 |
 | Average precision | 0.899 | 0.025 | 0.963 |
 
-The cross-validation means show relatively limited fold-to-fold variation for this training partition, although precision and recall vary more than accuracy, F1, and discrimination metrics. The held-out values fall near or above the cross-validation means, but one favorable test split cannot establish generalizability.
+Fold-to-fold variation is modest for accuracy, F1-score, ROC-AUC, and average precision, while precision and recall vary more. Held-out results are near or above the cross-validation means, but one favorable test partition cannot establish generalizability.
 
-### 8.4 Calibration Analysis
+[Cross-validation metric summary](figures/validation_cross_validation_metrics.png)
 
-The held-out Brier score is 0.083. The calibration curve is broadly ordered, but some middle-probability bins differ noticeably from their observed positive fractions. With only 61 held-out records, each calibration bin contains few observations, so the curve is too uncertain to support claims that the probabilities are clinically calibrated.
+### 6.2 Calibration
 
-### 8.5 Threshold Analysis
+The held-out Brier score is `0.083`. Predicted probabilities are broadly ordered with observed outcome frequency, but middle-probability bins show visible departures from the perfect-calibration line. Because the held-out sample contains only 61 records, the calibration curve is imprecise and cannot support a claim of clinical calibration.
 
-Thresholds from 0.20 to 0.80 were examined descriptively on the held-out test set. As the threshold increased:
+[Held-out calibration curve](figures/validation_calibration_curve.png)
 
-- Recall decreased from 1.000 at 0.20 to 0.750 at 0.80.
-- Specificity increased from 0.606 at 0.20 to 0.970 at 0.80.
-- Precision increased from 0.683 at 0.20 to 0.955 at 0.80.
+## 7. Threshold Analysis
 
-This illustrates that a probability threshold is not clinically neutral. It changes the balance between false positives and false negatives. Selecting a threshold would require a predefined use case, explicit error costs, prevalence context, and validation in an appropriate external population. No clinical threshold is selected here.
+Thresholds from `0.20` to `0.80` were examined descriptively on the held-out test set.
 
-### 8.6 Why This Is Not Clinical Validation
+- Recall decreases from `1.000` at threshold `0.20` to `0.750` at `0.80`.
+- Specificity increases from `0.606` at threshold `0.20` to `0.970` at `0.80`.
+- Precision increases from `0.683` at threshold `0.20` to `0.955` at `0.80`.
 
-This work is internal validation on a small historical dataset. It does not evaluate transportability across institutions, time periods, populations, measurement systems, or clinical workflows. It also does not assess prospective impact, fairness, decision utility, or patient outcomes.
+Changing a threshold alters the balance between false positives and false negatives. A threshold is therefore not clinically neutral. Selection would require a prespecified use case, explicit error costs, prevalence context, and validation in a relevant external population. No clinical threshold is selected in this project.
 
-### 8.7 Next Steps
+- [Threshold metric comparison](figures/validation_threshold_metrics.png)
+- [Confusion matrix at threshold 0.50](figures/validation_test_confusion_matrix_threshold_050.png)
 
-- Quantify calibration uncertainty with resampling in a later phase.
-- Evaluate the unchanged pipeline on an external dataset if a suitable permitted source is identified.
-- Define any future threshold analysis from a stated decision context rather than optimizing on the test set.
-- Avoid adding model complexity until the validation objective is clear.
+## 8. Ethical and Clinical Scope
 
-## 9. Overall Limitations
+- The project is educational and retrospective.
+- The outcome is a historical dataset label.
+- Predictive associations are not causal effects.
+- Model coefficients are not clinical risk factors established by this analysis.
+- Results must not be used for diagnosis, treatment, or individual decision-making.
+- Internal validation does not demonstrate transportability, safety, fairness, or clinical benefit.
 
-- The dataset is historical and may not reflect contemporary clinical practice.
-- The processed Cleveland file is a reduced 14-variable version of the original dataset.
-- Missingness in `ca` and `thal` must be handled transparently before modeling.
-- Several variables are encoded categories and should not be over-interpreted without documentation.
-- Generalizability is limited.
-- Internal cross-validation does not replace external validation.
-- Threshold analysis is descriptive and does not establish decision utility.
-- Clinical deployment is outside the scope of this repository.
+## 9. Limitations
 
-## 10. Reproducibility
+- The dataset is small, historical, and derived from a limited setting.
+- The processed file contains only 14 of the original database variables.
+- Some variables are integer-coded categories with limited contextual detail.
+- Missing values occur in `ca` and `thal`.
+- Evaluation uses one held-out partition and no external cohort.
+- Calibration estimates are sensitive to the small test sample and binning strategy.
+- Threshold comparisons are descriptive and do not establish decision utility.
+- The project does not assess temporal drift, subgroup fairness, prospective impact, or patient outcomes.
 
-Document the exact commands used to reproduce preprocessing, modeling, evaluation, and figures.
+## 10. Conclusion
+
+The project provides a reproducible example of leakage-aware preprocessing, interpretable baseline modeling, internal validation, and cautious probability assessment for clinical tabular data. The logistic regression pipeline shows predictive signal within the processed Cleveland dataset, with reasonably stable training-set cross-validation estimates. These findings are limited to this educational analysis and do not establish clinical validity.
+
+## 11. Future Work
+
+- Evaluate the unchanged pipeline on a suitable external dataset.
+- Quantify uncertainty in calibration estimates using resampling.
+- Define threshold analyses from a prespecified decision context.
+- Assess subgroup performance only when sample size and variable definitions support responsible interpretation.
+- Retain simple models until a clear validation objective justifies additional complexity.
+
+## 12. Reproducibility
+
+Install dependencies:
 
 ```bash
+python -m venv .venv
 python -m pip install -r requirements.txt
+```
+
+Place the official processed Cleveland file at:
+
+```text
+data/raw/processed.cleveland.data
+```
+
+Run notebooks `01`, `02`, and `03` in order, then run:
+
+```bash
 python -m pytest
 python -m ruff check .
 ```
 
-## 11. Conclusion
+## 13. References
 
-EDA, an interpretable baseline, and internal validation are complete. The results support the reproducibility of the workflow within this dataset, but they do not establish clinical validity. Further work should prioritize external validation and calibration uncertainty before considering more complex models.
+1. Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). *Heart Disease* [Dataset]. UCI Machine Learning Repository. <https://doi.org/10.24432/C52P4X>
+2. Pedregosa, F., Varoquaux, G., Gramfort, A., et al. (2011). Scikit-learn: Machine Learning in Python. *Journal of Machine Learning Research, 12*, 2825-2830.

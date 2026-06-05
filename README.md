@@ -1,87 +1,150 @@
-# Clinical Risk Modeling
+# Interpretable Clinical Risk Modeling
 
-This repository is a Biomedical Data Science for Personalized Medicine portfolio project using the UCI Heart Disease dataset. It emphasizes reproducible preprocessing, interpretable baseline modeling, cautious evaluation, and transparent reporting.
+An educational Biomedical Data Science for Personalized Medicine portfolio project using the UCI Heart Disease processed Cleveland dataset. The project demonstrates a reproducible workflow for clinical tabular data: source documentation, exploratory analysis, leakage-aware preprocessing, interpretable logistic regression, internal cross-validation, calibration assessment, and threshold analysis.
 
-No raw dataset is tracked in Git. This repository must not contain sensitive, private, restricted, or re-identifiable patient data.
+This repository is not a diagnostic tool, clinical decision support system, or clinically validated risk model.
 
-## Current Phase
+## Biomedical Motivation
 
-Phase 5 adds training-set cross-validation, held-out calibration assessment, and exploratory threshold analysis for the logistic regression baseline. The model remains educational and is not clinically validated. Generated figures are stored in `reports/figures/`.
+Clinical prediction projects require more than a high performance estimate. They also require a clearly defined outcome, transparent preprocessing, separation of training and evaluation data, calibration assessment, and careful discussion of where a model may fail. This project uses a small historical dataset to demonstrate those practices without making claims about clinical utility.
 
-## Biomedical Question
+## Dataset
 
-Primary question to define after dataset selection:
+The analysis uses the processed Cleveland subset of the UCI Heart Disease dataset:
 
-> Can routinely available clinical variables be used to estimate the risk of a clinically meaningful outcome for a defined patient population?
+> Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). *Heart Disease* [Dataset]. UCI Machine Learning Repository. <https://doi.org/10.24432/C52P4X>
 
-The final question should specify:
+- Dataset page: <https://archive.ics.uci.edu/dataset/45/heart+disease>
+- UCI license: CC BY 4.0
+- Local file: `data/raw/processed.cleveland.data`
+- Analysis cohort: 303 rows and 14 original variables
 
-- Patient population and inclusion criteria
-- Prediction target and prediction time point
-- Candidate predictors available before the prediction time point
-- Intended analytical use, such as retrospective risk stratification or baseline modeling
+Raw data are intentionally excluded from Git. See [data/README_data.md](data/README_data.md) for the data card, variable dictionary, access instructions, and limitations.
 
-## Planned Workflow
+## Analytical Workflow
 
-1. Document the dataset source, access date, license, variables, and restrictions in `data/README_data.md`.
-2. Place raw data locally under `data/raw/` only if it is public, permitted, and non-sensitive.
-3. Create cleaned analysis files under `data/processed/`.
-4. Develop readable exploratory analysis in `notebooks/`.
-5. Reuse modular code from `src/` for preprocessing, feature construction, modeling, and evaluation.
-6. Summarize methods, results, limitations, and interpretation in `reports/final_report.md`.
+1. Document the dataset source, license, variables, missingness, and intended use.
+2. Inspect data quality, distributions, duplicates, and the original outcome coding.
+3. Preserve the original `target` and derive `target_binary` for educational binary classification.
+4. Create a stratified 80/20 train/test split.
+5. Fit imputation, scaling, one-hot encoding, and logistic regression inside a scikit-learn pipeline using training data only.
+6. Compare logistic regression with a majority-class dummy baseline.
+7. Perform five-fold stratified cross-validation on the training partition.
+8. Evaluate discrimination, calibration, and threshold-dependent tradeoffs on the held-out test set.
+
+## Main Outputs
+
+- [Exploratory data analysis](notebooks/01_exploratory_data_analysis.ipynb)
+- [Baseline logistic regression](notebooks/02_baseline_modeling.ipynb)
+- [Model validation and calibration](notebooks/03_model_validation_and_calibration.ipynb)
+- [Professional project report](reports/final_report.md)
+- [Generated figures](reports/figures/)
+- [Reusable source modules](src/)
+- [Automated tests](tests/test_basic.py)
+
+## Key Findings
+
+### Exploratory Analysis
+
+- Missing values occur in `ca` (4 records) and `thal` (2 records).
+- No duplicate rows were identified.
+- The binary analysis target contains 164 records coded `0` and 139 coded `1`.
+- Descriptive differences between target groups are dataset-specific observations and are not interpreted causally.
+
+### Baseline Modeling
+
+On the 61-record held-out test set, the logistic regression baseline produced:
+
+| Accuracy | Precision | Recall | F1-score | ROC-AUC | Average precision |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0.869 | 0.812 | 0.929 | 0.867 | 0.966 | 0.963 |
+
+These values describe one split of a small historical dataset. They do not establish clinical validity or transportability.
+
+### Validation and Calibration
+
+Five-fold cross-validation was performed only within the training partition:
+
+| Metric | Mean | Standard deviation |
+| --- | ---: | ---: |
+| Accuracy | 0.855 | 0.027 |
+| F1-score | 0.837 | 0.029 |
+| ROC-AUC | 0.902 | 0.017 |
+| Average precision | 0.899 | 0.025 |
+
+The held-out Brier score was `0.083`. The calibration curve was broadly ordered but uncertain in middle-probability regions because the test set is small. Threshold analysis showed the expected tradeoff: higher thresholds increased specificity and precision while reducing recall. No clinical threshold was selected.
 
 ## Repository Structure
 
 ```text
 clinical-risk-modeling/
 |-- data/
-|   |-- raw/                 # Local raw data, not committed
-|   |-- processed/           # Local processed data, not committed
-|   `-- README_data.md       # UCI Heart Disease data card
-|-- notebooks/               # Sequential exploratory notebooks
+|   |-- raw/                 # Local raw data; ignored by Git
+|   |-- processed/           # Local derived data; ignored by Git
+|   `-- README_data.md       # Dataset data card
+|-- notebooks/
+|   |-- 01_exploratory_data_analysis.ipynb
+|   |-- 02_baseline_modeling.ipynb
+|   `-- 03_model_validation_and_calibration.ipynb
 |-- reports/
-|   |-- figures/             # Generated figures
-|   `-- final_report.md      # Structured report template
-|-- src/
-|   |-- data_processing.py   # Data loading and cleaning helpers
-|   |-- features.py          # Feature engineering helpers
-|   |-- modeling.py          # Baseline modeling helpers
-|   `-- evaluation.py        # Evaluation metrics and summaries
-|-- tests/
-|   `-- test_basic.py        # Minimal starter tests
+|   |-- figures/             # Generated analytical figures
+|   `-- final_report.md      # Complete written report
+|-- src/                     # Reusable processing, modeling, and evaluation code
+|-- tests/                   # Pytest coverage for core helpers
+|-- CITATION.cff
+|-- LICENSE
 `-- requirements.txt
 ```
 
-## Reproducibility
+## Ethical and Clinical Caution
+
+- The outcome is a historical dataset label, not a diagnosis generated by this project.
+- Associations and model coefficients are not interpreted as causal effects.
+- Internal cross-validation does not replace external or prospective validation.
+- Calibration and threshold behavior depend on population, prevalence, measurement practices, and intended use.
+- The model must not be used for individual medical decisions.
+
+## Limitations
+
+- Small, historical dataset from a limited setting
+- Reduced 14-variable representation of the original database
+- Missing data in two predictors
+- Encoded categorical variables with limited contextual detail
+- One held-out test partition and no external cohort
+- No assessment of prospective impact, subgroup fairness, or clinical decision utility
+
+## Reproduction
 
 Create an environment and install dependencies:
 
 ```bash
 python -m venv .venv
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Run tests:
+Download the processed Cleveland file from the official UCI page and place it at:
+
+```text
+data/raw/processed.cleveland.data
+```
+
+Run the notebooks in numerical order. Then run the automated checks:
 
 ```bash
 python -m pytest
-```
-
-Run linting:
-
-```bash
 python -m ruff check .
 ```
 
-## Modeling Principles
+## Next Steps
 
-- Start with simple, interpretable baselines.
-- Separate training and evaluation data before fitting preprocessing steps.
-- Avoid leakage from future information, outcome-derived variables, or post-baseline measurements.
-- Report discrimination and calibration when appropriate.
-- Interpret results as predictive associations, not causal effects.
-- Document missingness, cohort construction, exclusions, and limitations.
+- Evaluate the unchanged pipeline on a suitable external dataset.
+- Quantify calibration uncertainty with resampling.
+- Define any future threshold analysis from a prespecified decision context.
+- Assess subgroup performance only when sample size and variable definitions support responsible interpretation.
 
-## Current Status
+## Licensing and Citation
 
-Initial EDA, baseline modeling, and internal validation have been completed locally using `data/raw/processed.cleveland.data`. Raw data are excluded from Git.
+Repository code and documentation are available under the [MIT License](LICENSE). The UCI dataset is a separate work distributed under CC BY 4.0; the repository license does not relicense or redistribute the raw dataset.
+
+To cite this portfolio project, see [CITATION.cff](CITATION.cff).

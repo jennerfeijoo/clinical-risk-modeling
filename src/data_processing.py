@@ -5,7 +5,7 @@ permitted files only.
 """
 
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 import pandas as pd
 
@@ -27,8 +27,8 @@ HEART_DISEASE_COLUMNS: list[str] = [
 ]
 
 
-def load_csv(path: str | Path, **read_csv_kwargs: object) -> pd.DataFrame:
-    """Load a local CSV file with a clear error if the file is missing."""
+def load_csv(path: str | Path, **read_csv_kwargs: Any) -> pd.DataFrame:
+    """Load a local CSV file without modifying or downloading source data."""
     csv_path = Path(path)
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
@@ -36,7 +36,7 @@ def load_csv(path: str | Path, **read_csv_kwargs: object) -> pd.DataFrame:
 
 
 def standardize_column_names(data: pd.DataFrame) -> pd.DataFrame:
-    """Return a copy with lower-case, snake_case column names."""
+    """Return a copy with trimmed, lower-case, snake_case column names."""
     cleaned = data.copy()
     cleaned.columns = [
         str(column).strip().lower().replace(" ", "_").replace("-", "_")
@@ -46,14 +46,14 @@ def standardize_column_names(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def drop_columns(data: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
-    """Drop columns if present, leaving the input DataFrame unchanged."""
+    """Return a copy with the requested columns removed when present."""
     return data.drop(columns=[col for col in columns if col in data.columns]).copy()
 
 
 def split_features_target(
     data: pd.DataFrame, target_column: str
 ) -> tuple[pd.DataFrame, pd.Series]:
-    """Split a DataFrame into predictors and target."""
+    """Return independent copies of predictors and the selected target."""
     if target_column not in data.columns:
         raise ValueError(f"Target column not found: {target_column}")
 
@@ -65,7 +65,7 @@ def split_features_target(
 def validate_expected_columns(
     data: pd.DataFrame, expected_columns: Iterable[str]
 ) -> None:
-    """Raise an error if a DataFrame is missing expected columns."""
+    """Raise ``ValueError`` when any required column is absent."""
     missing_columns = [column for column in expected_columns if column not in data.columns]
     if missing_columns:
         missing = ", ".join(missing_columns)
@@ -73,15 +73,15 @@ def validate_expected_columns(
 
 
 def clean_missing_values(data: pd.DataFrame) -> pd.DataFrame:
-    """Replace UCI missing-value markers with pandas missing values."""
+    """Return a copy with UCI ``?`` markers replaced by pandas missing values."""
     return data.replace("?", pd.NA).copy()
 
 
 def load_heart_disease_data(path: str | Path) -> pd.DataFrame:
-    """Load the local UCI processed Cleveland Heart Disease file.
+    """Load the local UCI processed Cleveland file with documented columns.
 
-    The expected raw file is not downloaded by this project. Place the official
-    UCI file at data/raw/processed.cleveland.data before calling this helper.
+    The helper never downloads data. The official file must be placed at
+    ``data/raw/processed.cleveland.data`` by the user.
     """
     data = load_csv(
         path,
@@ -96,10 +96,13 @@ def load_heart_disease_data(path: str | Path) -> pd.DataFrame:
 def binarize_heart_disease_target(
     data: pd.DataFrame, target_column: str = "target"
 ) -> pd.DataFrame:
-    """Convert the original target coding to 0 for 0 and 1 for values above 0."""
+    """Return a copy with target ``0`` retained and values above ``0`` mapped to 1."""
     if target_column not in data.columns:
         raise ValueError(f"Target column not found: {target_column}")
 
     cleaned = data.copy()
-    cleaned[target_column] = (cleaned[target_column] > 0).astype(int)
+    target = pd.to_numeric(cleaned[target_column], errors="raise")
+    if target.isna().any():
+        raise ValueError("Target values must not be missing.")
+    cleaned[target_column] = (target > 0).astype(int)
     return cleaned

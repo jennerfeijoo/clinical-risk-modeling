@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this portfolio project, please cite it using the metadata below."
+title: "Interpretable Clinical Risk Modeling with the UCI Heart Disease Dataset"
+type: software
+authors:
+  - family-names: "Feijoo"
+    given-names: "Jenner"
+repository-code: "https://github.com/jennerfeijoo/clinical-risk-modeling"
+url: "https://github.com/jennerfeijoo/clinical-risk-modeling"
+license: MIT
+abstract: >-
+  A reproducible biomedical data science portfolio project demonstrating
+  exploratory analysis, interpretable logistic regression, internal
+  validation, calibration assessment, and threshold analysis with the UCI
+  Heart Disease processed Cleveland dataset.
+keywords:
+  - biomedical data science
+  - clinical risk modeling
+  - logistic regression
+  - calibration
+  - reproducible research

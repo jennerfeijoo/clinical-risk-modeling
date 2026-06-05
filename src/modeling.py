@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pandas as pd
+from sklearn.compose import ColumnTransformer
 from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -17,7 +18,7 @@ def split_train_test(
     test_size: float = 0.2,
     random_state: int = 42,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """Create a stratified train/test split for binary classification."""
+    """Create a reproducible stratified split while preserving X/y alignment."""
     return train_test_split(
         features,
         target,
@@ -27,8 +28,8 @@ def split_train_test(
     )
 
 
-def create_preprocessing_pipeline(columns: FeatureColumns):
-    """Create the preprocessing pipeline used by baseline classifiers."""
+def create_preprocessing_pipeline(columns: FeatureColumns) -> ColumnTransformer:
+    """Create the preprocessing transformer used by baseline classifiers."""
     return build_preprocessor(columns)
 
 
@@ -36,11 +37,10 @@ def build_logistic_regression_model(
     columns: FeatureColumns,
     random_state: int = 42,
 ) -> Pipeline:
-    """Build an interpretable baseline classifier.
+    """Build an interpretable, leakage-aware logistic regression pipeline.
 
-    Logistic regression is a reasonable first model for many binary clinical
-    risk prediction tasks. More complex models should be added only after this
-    baseline is documented and evaluated.
+    Imputation, scaling, and encoding are fitted inside the pipeline so they can
+    be learned independently within training folds.
     """
     return Pipeline(
         steps=[
@@ -67,5 +67,5 @@ def create_logistic_regression_pipeline(
 
 
 def create_dummy_classifier(random_state: int = 42) -> DummyClassifier:
-    """Build a simple majority-class baseline classifier."""
+    """Build a majority-class comparator for contextualizing model metrics."""
     return DummyClassifier(strategy="most_frequent", random_state=random_state)

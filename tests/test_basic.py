@@ -4,6 +4,7 @@ import pytest
 from src.data_processing import (
     HEART_DISEASE_COLUMNS,
     binarize_heart_disease_target,
+    clean_missing_values,
     split_features_target,
     standardize_column_names,
     validate_expected_columns,
@@ -156,3 +157,13 @@ def test_binarize_target_does_not_mutate_input_dataframe() -> None:
     binarize_heart_disease_target(data)
 
     pd.testing.assert_frame_equal(data, original)
+
+
+def test_clean_missing_values_does_not_mutate_input_dataframe() -> None:
+    data = pd.DataFrame({"ca": ["?", "1.0"]})
+    original = data.copy(deep=True)
+
+    cleaned = clean_missing_values(data)
+
+    pd.testing.assert_frame_equal(data, original)
+    assert cleaned["ca"].isna().sum() == 1

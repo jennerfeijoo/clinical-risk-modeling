@@ -9,12 +9,12 @@
 - Authors: Andras Janosi, William Steinbrunn, Matthias Pfisterer, and Robert Detrano
 - Official citation: Janosi, A., Steinbrunn, W., Pfisterer, M., & Detrano, R. (1989). Heart Disease [Dataset]. UCI Machine Learning Repository. <https://doi.org/10.24432/C52P4X>
 - License: CC BY 4.0, according to the UCI dataset page
-- Access date: TODO: add date when the raw file is downloaded
+- Local access date: June 5, 2026
 - Expected raw file: `data/raw/processed.cleveland.data`
 
 ## Intended Use in This Repository
 
-This dataset is used for educational portfolio work in Biomedical Data Science for Personalized Medicine. The current phase is limited to data documentation and exploratory data analysis. Future phases may add simple, interpretable baseline modeling after the data source, preprocessing decisions, and limitations are documented.
+This dataset is used for educational portfolio work in Biomedical Data Science for Personalized Medicine. The repository includes exploratory analysis, an interpretable logistic regression baseline, internal cross-validation, calibration assessment, and threshold analysis.
 
 ## Not Intended Use
 
@@ -22,7 +22,7 @@ This repository is not a diagnostic medical tool, clinical decision support syst
 
 ## Access and Placement
 
-The raw dataset is not committed to this repository. To run the exploratory notebook:
+The raw dataset is not committed to this repository. To reproduce the notebooks:
 
 1. Go to the official UCI dataset page: <https://archive.ics.uci.edu/dataset/45/heart+disease>.
 2. Download the dataset files from UCI.
@@ -43,7 +43,7 @@ The UCI Heart Disease dataset is a public educational dataset, but it originates
 The commonly used processed Cleveland file contains a final variable originally named `num`. In this repository it is loaded as `target`.
 
 - Original coding: `0`, `1`, `2`, `3`, `4`
-- Educational binary coding for future modeling: `0` remains `0`; values greater than `0` are mapped to `1`
+- Educational binary coding used in this repository: `0` remains `0`; values greater than `0` are mapped to `1`
 
 In the original dataset framing, values greater than `0` indicate presence of angiographic heart disease. This should be interpreted only as a dataset label definition, not as a medical claim or diagnostic statement.
 

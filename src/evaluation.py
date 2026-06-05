@@ -7,8 +7,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator
 from sklearn.calibration import calibration_curve
-from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     PrecisionRecallDisplay,
@@ -23,6 +23,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
 CLASSIFICATION_SCORING: dict[str, str] = {
     "accuracy": "accuracy",
@@ -98,13 +99,13 @@ def compute_classification_metrics(
 
 
 def summarize_cross_validation(
-    estimator: object,
+    estimator: BaseEstimator,
     features: pd.DataFrame,
     target: pd.Series,
     n_splits: int = 5,
     random_state: int = 42,
 ) -> pd.DataFrame:
-    """Summarize stratified cross-validation metrics on training data."""
+    """Return mean and sample SD for stratified training-set CV metrics."""
     splitter = StratifiedKFold(
         n_splits=n_splits,
         shuffle=True,
@@ -134,7 +135,7 @@ def threshold_metrics_table(
     y_probability: pd.Series | np.ndarray,
     thresholds: list[float] | tuple[float, ...],
 ) -> pd.DataFrame:
-    """Compute classification metrics across probability thresholds."""
+    """Return confusion counts and classification metrics for each threshold."""
     probabilities = validate_probabilities(y_probability)
     if len(y_true) != len(probabilities):
         raise ValueError("Targets and probabilities must have equal lengths.")
@@ -200,7 +201,10 @@ def plot_roc_curve(
     output_path: str | Path,
 ) -> None:
     """Save a ROC curve plot."""
-    display = RocCurveDisplay.from_predictions(y_true, y_probability)
+    probabilities = validate_probabilities(y_probability)
+    if len(y_true) != len(probabilities):
+        raise ValueError("Targets and probabilities must have equal lengths.")
+    display = RocCurveDisplay.from_predictions(y_true, probabilities)
     display.ax_.set_title("Logistic Regression ROC Curve")
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -213,7 +217,10 @@ def plot_precision_recall_curve(
     output_path: str | Path,
 ) -> None:
     """Save a precision-recall curve plot."""
-    display = PrecisionRecallDisplay.from_predictions(y_true, y_probability)
+    probabilities = validate_probabilities(y_probability)
+    if len(y_true) != len(probabilities):
+        raise ValueError("Targets and probabilities must have equal lengths.")
+    display = PrecisionRecallDisplay.from_predictions(y_true, probabilities)
     display.ax_.set_title("Logistic Regression Precision-Recall Curve")
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -289,6 +296,8 @@ def plot_calibration_assessment(
 ) -> None:
     """Save a held-out calibration curve with a perfect-calibration reference."""
     probabilities = validate_probabilities(y_probability)
+    if len(y_true) != len(probabilities):
+        raise ValueError("Targets and probabilities must have equal lengths.")
     fraction_positive, mean_predicted = calibration_curve(
         y_true,
         probabilities,
