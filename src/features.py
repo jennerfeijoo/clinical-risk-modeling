@@ -24,7 +24,11 @@ class FeatureColumns:
 
 
 def define_heart_disease_feature_columns() -> FeatureColumns:
-    """Return feature groups for the UCI processed Cleveland dataset."""
+    """Return explicit feature groups for the processed Cleveland dataset.
+
+    Continuous measurements are treated as numeric. Integer-coded categories
+    are treated as categorical so their codes are not assumed to be linear.
+    """
     return FeatureColumns(
         numeric=["age", "trestbps", "chol", "thalach", "oldpeak"],
         categorical=["sex", "cp", "fbs", "restecg", "exang", "slope", "ca", "thal"],

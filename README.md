@@ -1,12 +1,12 @@
 # Clinical Risk Modeling
 
-This repository is a starter project for a Biomedical Data Science for Personalized Medicine portfolio. It is designed for a future clinical risk modeling dataset, with emphasis on reproducible preprocessing, interpretable baseline models, cautious evaluation, and transparent reporting.
+This repository is a Biomedical Data Science for Personalized Medicine portfolio project using the UCI Heart Disease dataset. It emphasizes reproducible preprocessing, interpretable baseline modeling, cautious evaluation, and transparent reporting.
 
 No raw dataset is tracked in Git. This repository must not contain sensitive, private, restricted, or re-identifiable patient data.
 
 ## Current Phase
 
-Phase 4 adds an interpretable logistic regression baseline for the UCI Heart Disease dataset. The model is exploratory, educational, and not clinically validated. Generated EDA and baseline-modeling figures are stored in `reports/figures/`.
+Phase 5 adds training-set cross-validation, held-out calibration assessment, and exploratory threshold analysis for the logistic regression baseline. The model remains educational and is not clinically validated. Generated figures are stored in `reports/figures/`.
 
 ## Biomedical Question
 
@@ -37,7 +37,7 @@ clinical-risk-modeling/
 |-- data/
 |   |-- raw/                 # Local raw data, not committed
 |   |-- processed/           # Local processed data, not committed
-|   `-- README_data.md       # Data card template
+|   `-- README_data.md       # UCI Heart Disease data card
 |-- notebooks/               # Sequential exploratory notebooks
 |-- reports/
 |   |-- figures/             # Generated figures
@@ -84,4 +84,4 @@ python -m ruff check .
 
 ## Current Status
 
-Initial EDA and baseline modeling have been completed locally using `data/raw/processed.cleveland.data`. Raw data are excluded from Git.
+Initial EDA, baseline modeling, and internal validation have been completed locally using `data/raw/processed.cleveland.data`. Raw data are excluded from Git.

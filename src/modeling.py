@@ -5,8 +5,8 @@ from __future__ import annotations
 import pandas as pd
 from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 
 from src.features import FeatureColumns, build_preprocessor
 
@@ -32,7 +32,10 @@ def create_preprocessing_pipeline(columns: FeatureColumns):
     return build_preprocessor(columns)
 
 
-def build_logistic_regression_model(columns: FeatureColumns) -> Pipeline:
+def build_logistic_regression_model(
+    columns: FeatureColumns,
+    random_state: int = 42,
+) -> Pipeline:
     """Build an interpretable baseline classifier.
 
     Logistic regression is a reasonable first model for many binary clinical
@@ -48,16 +51,19 @@ def build_logistic_regression_model(columns: FeatureColumns) -> Pipeline:
                     max_iter=1000,
                     class_weight="balanced",
                     solver="liblinear",
-                    random_state=42,
+                    random_state=random_state,
                 ),
             ),
         ]
     )
 
 
-def create_logistic_regression_pipeline(columns: FeatureColumns) -> Pipeline:
-    """Build the Phase 4 baseline logistic regression pipeline."""
-    return build_logistic_regression_model(columns)
+def create_logistic_regression_pipeline(
+    columns: FeatureColumns,
+    random_state: int = 42,
+) -> Pipeline:
+    """Build the reusable baseline logistic regression pipeline."""
+    return build_logistic_regression_model(columns, random_state=random_state)
 
 
 def create_dummy_classifier(random_state: int = 42) -> DummyClassifier:

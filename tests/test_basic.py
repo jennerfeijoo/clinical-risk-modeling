@@ -8,7 +8,12 @@ from src.data_processing import (
     standardize_column_names,
     validate_expected_columns,
 )
-from src.evaluation import compute_classification_metrics
+from src.evaluation import (
+    compute_classification_metrics,
+    summarize_cross_validation,
+    threshold_metrics_table,
+    validate_probabilities,
+)
 from src.features import FeatureColumns
 from src.modeling import create_logistic_regression_pipeline, split_train_test
 
@@ -99,3 +104,55 @@ def test_classification_metrics_return_expected_keys() -> None:
         "roc_auc",
         "average_precision",
     }
+
+
+def test_cross_validation_summary_returns_expected_metrics() -> None:
+    features = pd.DataFrame(
+        {
+            "age": [40, 50, 60, 70, 45, 55, 65, 75, 42, 52],
+            "cp": [1, 2, 1, 3, 2, 3, 1, 2, 3, 1],
+        }
+    )
+    target = pd.Series([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+    columns = FeatureColumns(numeric=["age"], categorical=["cp"])
+    model = create_logistic_regression_pipeline(columns)
+
+    summary = summarize_cross_validation(
+        model, features, target, n_splits=2, random_state=42
+    )
+
+    assert set(summary["metric"]) == {
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "roc_auc",
+        "average_precision",
+    }
+
+
+def test_threshold_metric_table_has_one_row_per_threshold() -> None:
+    thresholds = [0.25, 0.5, 0.75]
+
+    table = threshold_metrics_table(
+        pd.Series([0, 1, 0, 1]),
+        pd.Series([0.1, 0.8, 0.4, 0.6]),
+        thresholds,
+    )
+
+    assert len(table) == len(thresholds)
+    assert table["threshold"].tolist() == thresholds
+
+
+def test_probability_validation_rejects_out_of_range_values() -> None:
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        validate_probabilities(pd.Series([0.2, 1.1]))
+
+
+def test_binarize_target_does_not_mutate_input_dataframe() -> None:
+    data = pd.DataFrame({"target": [0, 2], "age": [50, 60]})
+    original = data.copy(deep=True)
+
+    binarize_heart_disease_target(data)
+
+    pd.testing.assert_frame_equal(data, original)
